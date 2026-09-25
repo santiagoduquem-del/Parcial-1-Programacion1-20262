@@ -1,139 +1,30 @@
-package co.edu.uniquindio.parcial1.model;
+package model;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Clase Hotel - Representa el hotel StayPlus.
- * Es la clase raíz del sistema: administra por composición a Huesped,
- * Habitacion y ServicioAdicional (Reserva se alcanza de forma transitiva
- * a través de Huesped, por eso no tiene una lista propia de reservas).
- */
 public class Hotel {
-
-    // Atributos
     private String nombreComercial;
     private String nit;
-    private String telefono;
-    private String correo;
     private String direccion;
+    private String telefono;
     private String paginaWeb;
+    private List<Huesped> listaHuespedes;
+    private List<Habitacion> listaHabitaciones;
+    private List<Reserva> listaReservas;
+    private List<ServicioAdicional> listaServicios;
 
-    // Listas de composición (Hotel es el "dueño" de estos objetos)
-    private List<Huesped> listHotelHuespedes;
-    private List<Habitacion> listHotelHabitaciones;
-    private List<ServicioAdicional> listHotelServiciosAdicionales;
-
-    // Constructor
     public Hotel(String nombreComercial, String nit, String direccion, String telefono, String paginaWeb) {
         this.nombreComercial = nombreComercial;
         this.nit = nit;
         this.direccion = direccion;
         this.telefono = telefono;
         this.paginaWeb = paginaWeb;
-        this.listHotelHuespedes = new ArrayList<>();
-        this.listHotelHabitaciones = new ArrayList<>();
-        this.listHotelServiciosAdicionales = new ArrayList<>();
+        this.listaHuespedes = new ArrayList<>();
+        this.listaHabitaciones = new ArrayList<>();
+        this.listaReservas = new ArrayList<>();
+        this.listaServicios = new ArrayList<>();
     }
-
-    // ---------------------------------------------------------------
-    // Métodos de registro / administración
-    // ---------------------------------------------------------------
-
-    /** Registra un nuevo huésped en el hotel. */
-    public void registrarHuesped(Huesped h) {
-        listHotelHuespedes.add(h);
-    }
-
-    /** Agrega una nueva habitación al catálogo del hotel. */
-    public void agregarHabitacion(Habitacion h) {
-        listHotelHabitaciones.add(h);
-    }
-
-    /** Agrega un nuevo servicio adicional al catálogo del hotel. */
-    public void agregarServicioAdicional(ServicioAdicional s) {
-        listHotelServiciosAdicionales.add(s);
-    }
-
-    // ---------------------------------------------------------------
-    // Búsqueda de huésped por teléfono
-    // ---------------------------------------------------------------
-
-    /**
-     * Busca un huésped a partir de su número de teléfono.
-     * @param telefono número de teléfono a buscar
-     * @return el Huesped encontrado, o null si no existe ninguno con ese teléfono
-     */
-    public Huesped buscarHuespedPorTelefono(int telefono) {
-        for (Huesped h : listHotelHuespedes) {
-            if (h.getTelefono() == telefono) {
-                return h;
-            }
-        }
-        return null;
-    }
-
-    // ---------------------------------------------------------------
-    // Número perfecto
-    // ---------------------------------------------------------------
-
-    /**
-     * Determina si un número es perfecto, es decir, si es igual a la
-     * suma de sus divisores propios (sin incluir el mismo número).
-     * Ejemplo: 6 es perfecto porque 1 + 2 + 3 = 6.
-     * @param numero número a evaluar
-     * @return true si el número es perfecto, false en caso contrario
-     */
-    public boolean esNumeroPerfecto(int numero) {
-        if (numero <= 0) {
-            return false;
-        }
-        int sumaDivisores = 0;
-        for (int i = 1; i <= numero / 2; i++) {
-            if (numero % i == 0) {
-                sumaDivisores += i;
-            }
-        }
-        return sumaDivisores == numero;
-    }
-
-    /**
-     * Verifica si el número de teléfono de un huésped es un número perfecto.
-     * Combina la búsqueda por teléfono con la validación de número perfecto.
-     * @param telefono teléfono del huésped a consultar
-     * @return true si el teléfono del huésped corresponde a un número perfecto
-     */
-    public boolean telefonoHuespedEsPerfecto(int telefono) {
-        Huesped huesped = buscarHuespedPorTelefono(telefono);
-        if (huesped == null) {
-            return false;
-        }
-        return esNumeroPerfecto(telefono);
-    }
-
-
-
-    /**
-     * Calcula el total de ingresos correspondientes a las reservas cuya
-     * fecha de realización coincide con la fecha consultada.
-     * Recorre todos los huéspedes del hotel y, dentro de cada uno,
-     * todas sus reservas (Reserva se alcanza transitivamente vía Huesped).
-     * @param fecha fecha de realización a consultar
-     * @return valor total acumulado de las reservas de esa fecha
-     */
-    public double calcularIngresosPorFecha(LocalDate fecha) {
-        double totalIngresos = 0.0;
-        for (Huesped huesped : listHotelHuespedes) {
-            for (Reserva reserva : huesped.getListReservasHuesped()) {
-                if (reserva.getFechaRealizacion().equals(fecha)) {
-                    totalIngresos += reserva.getValorTotal();
-                }
-            }
-        }
-        return totalIngresos;
-    }
-
 
     public String getNombreComercial() {
         return nombreComercial;
@@ -151,28 +42,20 @@ public class Hotel {
         this.nit = nit;
     }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
     public String getDireccion() {
         return direccion;
     }
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public String getPaginaWeb() {
@@ -183,27 +66,286 @@ public class Hotel {
         this.paginaWeb = paginaWeb;
     }
 
-    public List<Huesped> getListHotelHuespedes() {
-        return listHotelHuespedes;
+    public List<Huesped> getListaHuespedes() {
+        return listaHuespedes;
     }
 
-    public List<Habitacion> getListHotelHabitaciones() {
-        return listHotelHabitaciones;
+    public void setListaHuespedes(List<Huesped> listaHuespedes) {
+        this.listaHuespedes = listaHuespedes;
     }
 
-    public List<ServicioAdicional> getListHotelServiciosAdicionales() {
-        return listHotelServiciosAdicionales;
+    public List<Habitacion> getListaHabitaciones() {
+        return listaHabitaciones;
     }
 
-    @Override
-    public String toString() {
-        return "Hotel{" +
-                "nombreComercial='" + nombreComercial + '\'' +
-                ", nit='" + nit + '\'' +
-                ", telefono='" + telefono + '\'' +
-                ", correo='" + correo + '\'' +
-                ", direccion='" + direccion + '\'' +
-                ", paginaWeb='" + paginaWeb + '\'' +
-                '}';
+    public void setListaHabitaciones(List<Habitacion> listaHabitaciones) {
+        this.listaHabitaciones = listaHabitaciones;
+    }
+
+    public List<Reserva> getListaReservas() {
+        return listaReservas;
+    }
+
+    public void setListaReservas(List<Reserva> listaReservas) {
+        this.listaReservas = listaReservas;
+    }
+
+    public List<ServicioAdicional> getListaServicios() {
+        return listaServicios;
+    }
+
+    public void setListaServicios(List<ServicioAdicional> listaServicios) {
+        this.listaServicios = listaServicios;
+    }
+
+    public int buscarHuesped(String documento) {
+        for (int i = 0; i < listaHuespedes.size(); i++) {
+            if (listaHuespedes.get(i).getDocumento().equals(documento)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean registrarHuesped(Huesped huesped) {
+        if (buscarHuesped(huesped.getDocumento()) == -1) {
+            listaHuespedes.add(huesped);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarHuesped(String documento, String nombre, String telefono, String correo, String pais) {
+        int posicion = buscarHuesped(documento);
+        if (posicion != -1) {
+            Huesped huesped = listaHuespedes.get(posicion);
+            huesped.setNombre(nombre);
+            huesped.setTelefono(telefono);
+            huesped.setCorreo(correo);
+            huesped.setPais(pais);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean eliminarHuesped(String documento) {
+        int posicion = buscarHuesped(documento);
+        if (posicion != -1) {
+            listaHuespedes.remove(posicion);
+            return true;
+        }
+        return false;
+    }
+
+    public Huesped buscarHuespedPorTelefono(String telefono) {
+        for (Huesped huesped : listaHuespedes) {
+            if (huesped.getTelefono().equals(telefono)) {
+                return huesped;
+            }
+        }
+        return null;
+    }
+
+    public String mostrarHuespedes() {
+        String mensaje = "";
+        for (Huesped huesped : listaHuespedes) {
+            mensaje += "\nDocumento: " + huesped.getDocumento() +
+                    "\nNombre: " + huesped.getNombre() +
+                    "\nTelefono: " + huesped.getTelefono() +
+                    "\nCorreo: " + huesped.getCorreo() +
+                    "\nPais: " + huesped.getPais() +
+                    "\nReservas realizadas: " + huesped.getListaReservas().size() + "\n";
+        }
+        return mensaje;
+    }
+
+    public int buscarHabitacion(String numero) {
+        for (int i = 0; i < listaHabitaciones.size(); i++) {
+            if (listaHabitaciones.get(i).getNumero().equals(numero)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean registrarHabitacion(Habitacion habitacion) {
+        if (buscarHabitacion(habitacion.getNumero()) == -1) {
+            listaHabitaciones.add(habitacion);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean eliminarHabitacion(String numero) {
+        int posicion = buscarHabitacion(numero);
+        if (posicion != -1) {
+            listaHabitaciones.remove(posicion);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarHabitacion(String numero, String piso, String tipo,
+                                        int capacidadMaxima, double precioPorNoche) {
+        int posicion = buscarHabitacion(numero);
+        if (posicion != -1) {
+            Habitacion habitacion = listaHabitaciones.get(posicion);
+            habitacion.setPiso(piso);
+            habitacion.setTipo(tipo);
+            habitacion.setCapacidadMaxima(capacidadMaxima);
+            habitacion.setPrecioPorNoche(precioPorNoche);
+            return true;
+        }
+        return false;
+    }
+
+    public String mostrarHabitaciones() {
+        String mensaje = "";
+        for (Habitacion habitacion : listaHabitaciones) {
+            mensaje += "\nNumero: " + habitacion.getNumero() +
+                    "\nPiso: " + habitacion.getPiso() +
+                    "\nTipo: " + habitacion.getTipo() +
+                    "\nPrecio por noche: " + habitacion.getPrecioPorNoche() +
+                    "\nEstado: " + habitacion.getEstado() +
+                    "\nReservas actuales: " + habitacion.getCantidadReservasActuales() + "\n";
+        }
+        return mensaje;
+    }
+
+    public int buscarReserva(String codigo) {
+        for (int i = 0; i < listaReservas.size(); i++) {
+            if (listaReservas.get(i).getCodigoReserva().equals(codigo)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean registrarReserva(Reserva reserva) {
+        if (buscarReserva(reserva.getCodigoReserva()) == -1) {
+            listaReservas.add(reserva);
+            reserva.getHuesped().agregarReserva(reserva);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean eliminarReserva(String codigo) {
+        int posicion = buscarReserva(codigo);
+        if (posicion != -1) {
+            listaReservas.remove(posicion);
+            return true;
+        }
+        return false;
+    }
+
+    public String mostrarReservas() {
+        String mensaje = "";
+        for (Reserva reserva : listaReservas) {
+            mensaje += "\nCodigo: " + reserva.getCodigoReserva() +
+                    "\nHuesped: " + reserva.getHuesped().getNombre() +
+                    "\nEstado: " + reserva.getEstado() +
+                    "\nFecha realizacion: " + reserva.getFechaRealizacion() +
+                    "\nMetodo de pago: " + reserva.getMetodoPago() +
+                    "\nHabitaciones asignadas: " + reserva.getCantidadHabitacionesAsignadas() +
+                    "\nValor total: " + reserva.getValorTotal() + "\n";
+        }
+        return mensaje;
+    }
+
+    public int buscarServicio(String codigo) {
+        for (int i = 0; i < listaServicios.size(); i++) {
+            if (listaServicios.get(i).getCodigo().equals(codigo)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean registrarServicio(ServicioAdicional servicio) {
+        if (buscarServicio(servicio.getCodigo()) == -1) {
+            listaServicios.add(servicio);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean eliminarServicio(String codigo) {
+        int posicion = buscarServicio(codigo);
+        if (posicion != -1) {
+            listaServicios.remove(posicion);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarServicio(String codigo, String nombre, String descripcion, double precio, boolean disponible) {
+        int posicion = buscarServicio(codigo);
+        if (posicion != -1) {
+            ServicioAdicional servicio = listaServicios.get(posicion);
+            servicio.setNombre(nombre);
+            servicio.setDescripcion(descripcion);
+            servicio.setPrecio(precio);
+            servicio.setDisponible(disponible);
+            return true;
+        }
+        return false;
+    }
+
+    public String mostrarServicios() {
+        String mensaje = "";
+        for (ServicioAdicional servicio : listaServicios) {
+            mensaje += "\nCodigo: " + servicio.getCodigo() +
+                    "\nNombre: " + servicio.getNombre() +
+                    "\nDescripcion: " + servicio.getDescripcion() +
+                    "\nPrecio: " + servicio.getPrecio() +
+                    "\nDisponible: " + servicio.isDisponible() + "\n";
+        }
+        return mensaje;
+    }
+
+    public boolean agregarServicioAReserva(String codigoReserva, String codigoServicio) {
+        int posicionReserva = buscarReserva(codigoReserva);
+        int posicionServicio = buscarServicio(codigoServicio);
+        if (posicionReserva != -1 && posicionServicio != -1) {
+            ServicioAdicional servicio = listaServicios.get(posicionServicio);
+            if (servicio.isDisponible()) {
+                listaReservas.get(posicionReserva).agregarServicioAdicional(servicio.getPrecio());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean esNumeroPerfecto(String telefono) {
+        String soloDigitos = telefono.replaceAll("[^0-9]", "");
+        if (soloDigitos.isEmpty() || soloDigitos.length() > 18) {
+            return false;
+        }
+        long numero = Long.parseLong(soloDigitos);
+        if (numero <= 1) {
+            return false;
+        }
+        long suma = 1;
+        for (long i = 2; i * i <= numero; i++) {
+            if (numero % i == 0) {
+                suma += i;
+                long pareja = numero / i;
+                if (pareja != i) {
+                    suma += pareja;
+                }
+            }
+        }
+        return suma == numero;
+    }
+
+    public double calcularIngresosPorFecha(String fecha) {
+        double total = 0;
+        for (Reserva reserva : listaReservas) {
+            if (reserva.getFechaRealizacion().equals(fecha)) {
+                total += reserva.calcularValorTotal();
+            }
+        }
+        return total;
     }
 }

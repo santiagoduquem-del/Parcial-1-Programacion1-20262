@@ -1,26 +1,25 @@
-package co.edu.uniquindio.parcial1.model;
+package model;
 
 public class ServicioAdicional {
-
-    private int codigo;
+    private String codigo;
     private String nombre;
     private String descripcion;
     private double precio;
-    private boolean disponibilidad;
+    private boolean disponible;
 
-    public ServicioAdicional(int codigo, String nombre, String descripcion, double precio) {
+    public ServicioAdicional(String codigo, String nombre, String descripcion, double precio, boolean disponible) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
-        this.disponibilidad = true;
+        this.disponible = disponible;
     }
 
-    public int getCodigo() {
+    public String getCodigo() {
         return codigo;
     }
 
-    public void setCodigo(int codigo) {
+    public void setCodigo(String codigo) {
         this.codigo = codigo;
     }
 
@@ -48,11 +47,11 @@ public class ServicioAdicional {
         this.precio = precio;
     }
 
-    public boolean isDisponibilidad() {
-        return disponibilidad;
+    public boolean isDisponible() {
+        return disponible;
     }
 
-    public void setDisponibilidad(boolean disponibilidad) {
-        this.disponibilidad = disponibilidad;
+    public void setDisponible(boolean disponible) {
+        this.disponible = disponible;
     }
 }

@@ -1,47 +1,38 @@
-package co.edu.uniquindio.parcial1.model;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+package model;
 
 public class Habitacion {
-
-    private int numero;
-    private int piso;
-    private String tipo; // Individual, Doble, Suite
+    private String numero;
+    private String piso;
+    private String tipo;
     private int capacidadMaxima;
     private double precioPorNoche;
-    private String estado; // Disponible, Reservada, Ocupada, Mantenimiento
+    private String estado;
+    private int cantidadReservasActuales;
 
-    // Fechas ya ocupadas por reservas confirmadas (para validar disponibilidad real)
-    private List<LocalDate[]> rangosOcupados;
+    public Habitacion(String numero, String piso, String tipo, int capacidadMaxima, double precioPorNoche) {
 
-    //Constructor
-    public Habitacion(int numero, int piso, String tipo,
-                      int capacidadMaxima, double precioPorNoche) {
         this.numero = numero;
         this.piso = piso;
         this.tipo = tipo;
         this.capacidadMaxima = capacidadMaxima;
         this.precioPorNoche = precioPorNoche;
         this.estado = "Disponible";
-        this.rangosOcupados = new ArrayList<>();
+        this.cantidadReservasActuales = 0;
     }
 
-    //Getters and Setters
-    public int getNumero() {
+    public String getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public int getPiso() {
+    public String getPiso() {
         return piso;
     }
 
-    public void setPiso(int piso) {
+    public void setPiso(String piso) {
         this.piso = piso;
     }
 
@@ -77,47 +68,41 @@ public class Habitacion {
         this.estado = estado;
     }
 
-    //Metodos propios del negocio
+    public int getCantidadReservasActuales() {
+        return cantidadReservasActuales;
+    }
 
-    //Valida el estado general de la habitacion (uso administrativo, ej. Mantenimiento)
+    public void setCantidadReservasActuales(int cantidadReservasActuales) {
+        this.cantidadReservasActuales = cantidadReservasActuales;
+    }
+
     public boolean estaDisponible() {
-        return estado.equals("Disponible") || estado.equals("Reservada");
+        return cantidadReservasActuales < capacidadMaxima;
     }
 
-    /**
-     * Valida si la habitacion esta disponible durante un rango de fechas especifico,
-     * comparando contra las fechas ya ocupadas por otras reservas confirmadas.
-     * Tal como pide el enunciado: "se debe validar que se encuentre disponible
-     * durante las fechas solicitadas".
-     */
-    public boolean validarDisponibilidad(LocalDate fechaEntrada, LocalDate fechaSalida) {
-        if (estado.equals("Mantenimiento")) {
-            return false;
-        }
-        for (LocalDate[] rango : rangosOcupados) {
-            boolean seCruzan = fechaEntrada.isBefore(rango[1]) && rango[0].isBefore(fechaSalida);
-            if (seCruzan) {
-                return false;
+    public boolean reservar() {
+        if (estaDisponible()) {
+            cantidadReservasActuales++;
+
+            if (cantidadReservasActuales >= capacidadMaxima) {
+                estado = "Ocupada";
+            } else {
+                estado = "Reservada";
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
-    //Se ejecuta cuando se confirma una reserva en la que la habitacion quedo incluida
-    public boolean reservar(LocalDate fechaEntrada, LocalDate fechaSalida) {
-        if (!validarDisponibilidad(fechaEntrada, fechaSalida)) {
-            return false;
+    public void liberar() {
+        if (cantidadReservasActuales > 0) {
+            cantidadReservasActuales--;
         }
-        rangosOcupados.add(new LocalDate[]{fechaEntrada, fechaSalida});
-        estado = "Reservada";
-        return true;
-    }
 
-    //Se ejecuta cuando la reserva en la que participaba finaliza o se cancela
-    public void liberar(LocalDate fechaEntrada, LocalDate fechaSalida) {
-        rangosOcupados.removeIf(r -> r[0].equals(fechaEntrada) && r[1].equals(fechaSalida));
-        if (rangosOcupados.isEmpty()) {
+        if (cantidadReservasActuales == 0) {
             estado = "Disponible";
+        } else {
+            estado = "Reservada";
         }
     }
 }

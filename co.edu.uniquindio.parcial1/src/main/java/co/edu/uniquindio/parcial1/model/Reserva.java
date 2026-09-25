@@ -1,14 +1,14 @@
-package co.edu.uniquindio.parcial1.model;
+package model;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
 public class Reserva {
 
     private String codigoReserva;
-    private LocalDate fechaRealizacion;
-    private LocalDate fechaEntrada;
-    private LocalDate fechaSalida;
+    private String fechaRealizacion;
+    private String fechaEntrada;
+    private String fechaSalida;
     private String estado;
     private String metodoPago;
     private int cantidadNoches;
@@ -17,14 +17,11 @@ public class Reserva {
     private double valorTotal;
 
     private Huesped huesped;
-    private List<Habitacion> habitaciones;
-    private List<ServicioAdicional> serviciosUtilizados;
+    private List<Habitacion> listaHabitaciones;
 
-    public Reserva(String codigoReserva, LocalDate fechaRealizacion, LocalDate fechaEntrada,
-                   LocalDate fechaSalida, String metodoPago, int cantidadNoches,
-                   Huesped huesped) {
-
-
+    public Reserva(String codigoReserva, String fechaRealizacion, String fechaEntrada,
+                    String fechaSalida, String metodoPago, int cantidadNoches,
+                    Huesped huesped) {
         this.codigoReserva = codigoReserva;
         this.fechaRealizacion = fechaRealizacion;
         this.fechaEntrada = fechaEntrada;
@@ -32,119 +29,145 @@ public class Reserva {
         this.metodoPago = metodoPago;
         this.cantidadNoches = cantidadNoches;
         this.huesped = huesped;
-        this.huesped.agregarReserva(this); // registra la reserva en la lista del huésped
 
         this.estado = "Pendiente";
         this.descuento = 0;
         this.costoServiciosAdicionales = 0;
         this.valorTotal = 0;
-        this.habitaciones = new ArrayList<>();
-        this.serviciosUtilizados = new ArrayList<>();
+        this.listaHabitaciones = new ArrayList<>();
     }
 
     public String getCodigoReserva() {
         return codigoReserva;
     }
+
     public void setCodigoReserva(String codigoReserva) {
         this.codigoReserva = codigoReserva;
     }
-    public LocalDate getFechaRealizacion() {
+
+    public String getFechaRealizacion() {
         return fechaRealizacion;
     }
-    public void setFechaRealizacion(LocalDate fechaRealizacion) {
+
+    public void setFechaRealizacion(String fechaRealizacion) {
         this.fechaRealizacion = fechaRealizacion;
     }
-    public LocalDate getFechaEntrada() {
+
+    public String getFechaEntrada() {
         return fechaEntrada;
     }
-    public void setFechaEntrada(LocalDate fechaEntrada) {
+
+    public void setFechaEntrada(String fechaEntrada) {
         this.fechaEntrada = fechaEntrada;
     }
-    public LocalDate getFechaSalida() {
+
+    public String getFechaSalida() {
         return fechaSalida;
     }
-    public void setFechaSalida(LocalDate fechaSalida) {
+
+    public void setFechaSalida(String fechaSalida) {
         this.fechaSalida = fechaSalida;
     }
+
     public String getEstado() {
         return estado;
     }
+
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
     public String getMetodoPago() {
         return metodoPago;
     }
+
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
     }
+
     public int getCantidadNoches() {
         return cantidadNoches;
     }
+
     public void setCantidadNoches(int cantidadNoches) {
         this.cantidadNoches = cantidadNoches;
     }
+
     public double getDescuento() {
         return descuento;
     }
+
     public void setDescuento(double descuento) {
         this.descuento = descuento;
     }
+
     public double getCostoServiciosAdicionales() {
         return costoServiciosAdicionales;
     }
+
     public void setCostoServiciosAdicionales(double costoServiciosAdicionales) {
         this.costoServiciosAdicionales = costoServiciosAdicionales;
     }
+
     public double getValorTotal() {
         return valorTotal;
     }
+
     public void setValorTotal(double valorTotal) {
         this.valorTotal = valorTotal;
     }
+
     public Huesped getHuesped() {
         return huesped;
     }
+
     public void setHuesped(Huesped huesped) {
         this.huesped = huesped;
     }
-    public List<Habitacion> getHabitaciones() {
-        return habitaciones;
-    }
-    public void setHabitaciones(List<Habitacion> habitaciones) {
-        this.habitaciones = habitaciones;
+
+    public List<Habitacion> getListaHabitaciones() {
+        return listaHabitaciones;
     }
 
-    public Habitacion buscarHabitacion(int numeroHabitacion) {
-        for (Habitacion habitacion : habitaciones) {
-            if (habitacion.getNumero() == numeroHabitacion) {
-                return habitacion;
+    public void setListaHabitaciones(List<Habitacion> listaHabitaciones) {
+        this.listaHabitaciones = listaHabitaciones;
+    }
+
+    public int getCantidadHabitacionesAsignadas() {
+        return listaHabitaciones.size();
+    }
+
+    public int buscarHabitacion(String numeroHabitacion) {
+        for (int i = 0; i < listaHabitaciones.size(); i++) {
+            if (listaHabitaciones.get(i).getNumero().equals(numeroHabitacion)) {
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
     public boolean agregarHabitacion(Habitacion nuevaHabitacion) {
-        if (!nuevaHabitacion.validarDisponibilidad(fechaEntrada, fechaSalida)) {
+
+        if (!nuevaHabitacion.estaDisponible()) {
             return false;
         }
 
-        if (buscarHabitacion(nuevaHabitacion.getNumero()) != null) {
+        if (buscarHabitacion(nuevaHabitacion.getNumero()) != -1) {
             return false;
         }
 
-        habitaciones.add(nuevaHabitacion);
+        listaHabitaciones.add(nuevaHabitacion);
+        calcularValorTotal();
         return true;
     }
 
-    public boolean eliminarHabitacion(int numeroHabitacion) {
-        Habitacion habitacion = buscarHabitacion(numeroHabitacion);
+    public boolean eliminarHabitacion(String numeroHabitacion) {
+        int posicion = buscarHabitacion(numeroHabitacion);
 
-        if (habitacion != null) {
-            if (estado.equals("Confirmada") || estado.equals("En curso")) {
-                habitacion.liberar(fechaEntrada, fechaSalida);
-            }
-            habitaciones.remove(habitacion);
+        if (posicion != -1) {
+            listaHabitaciones.get(posicion).liberar();
+            listaHabitaciones.remove(posicion);
+            calcularValorTotal();
             return true;
         }
 
@@ -156,10 +179,8 @@ public class Reserva {
             return false;
         }
 
-        for (Habitacion habitacion : habitaciones) {
-            if (!habitacion.reservar(fechaEntrada, fechaSalida)) {
-                return false; // alguna habitacion ya no esta disponible para esas fechas
-            }
+        for (Habitacion habitacion : listaHabitaciones) {
+            habitacion.reservar();
         }
 
         estado = "Confirmada";
@@ -168,72 +189,30 @@ public class Reserva {
     }
 
     public void cambiarEstado(String nuevoEstado) {
-        String estadoAnterior = this.estado;
         this.estado = nuevoEstado;
 
-        boolean sePierdeLaOcupacion = (estadoAnterior.equals("Confirmada") || estadoAnterior.equals("En curso"))
-                && (nuevoEstado.equals("Finalizada") || nuevoEstado.equals("Cancelada"));
-
-        if (sePierdeLaOcupacion) {
-            for (Habitacion habitacion : habitaciones) {
-                habitacion.liberar(fechaEntrada, fechaSalida);
+        if (nuevoEstado.equals("Finalizada") || nuevoEstado.equals("Cancelada")) {
+            for (Habitacion habitacion : listaHabitaciones) {
+                habitacion.liberar();
             }
         }
     }
 
-    public void agregarServicioAdicional(ServicioAdicional servicio) {
-        serviciosUtilizados.add(servicio);
-        costoServiciosAdicionales += servicio.getPrecio();
-    }
-
-    public List<ServicioAdicional> getServiciosUtilizados() {
-        return serviciosUtilizados;
+    public void agregarServicioAdicional(double precioServicio) {
+        costoServiciosAdicionales += precioServicio;
+        calcularValorTotal();
     }
 
     public double calcularValorTotal() {
         double totalPrecioHabitaciones = 0;
 
-        for (Habitacion habitacion : habitaciones) {
+        for (Habitacion habitacion : listaHabitaciones) {
             totalPrecioHabitaciones += habitacion.getPrecioPorNoche();
-        }
-
-        // Descuento automatico para huespedes frecuentes: 3 reservas o mas
-        if (huesped.getListReservasHuesped().size() >= 3) {
-            descuento = 10;
         }
 
         double subtotal = (totalPrecioHabitaciones * cantidadNoches) + costoServiciosAdicionales;
         valorTotal = subtotal - (subtotal * descuento / 100);
 
         return valorTotal;
-    }
-
-    // Imprime el resumen del pedido/estadía a partir de los datos de la propia reserva
-    public void imprimirDetalleReserva() {
-        System.out.println(" Detalle de la reserva " + codigoReserva );
-        System.out.println("Huesped: " + huesped.getNombre());
-        System.out.println("Fecha realizacion: " + fechaRealizacion);
-        System.out.println("Fecha entrada: " + fechaEntrada);
-        System.out.println("Fecha salida: " + fechaSalida);
-        System.out.println("Estado: " + estado);
-        System.out.println("Metodo de pago: " + metodoPago);
-        System.out.println("Cantidad de noches: " + cantidadNoches);
-        System.out.println("Habitaciones incluidas:");
-        for (Habitacion habitacion : habitaciones) {
-            System.out.println("  - Numero " + habitacion.getNumero() + " (" + habitacion.getTipo()
-                    + ") - $" + habitacion.getPrecioPorNoche() + " por noche");
-        }
-        System.out.println("Servicios adicionales utilizados:");
-        if (serviciosUtilizados.isEmpty()) {
-            System.out.println("  (ninguno)");
-        } else {
-            for (ServicioAdicional servicio : serviciosUtilizados) {
-                System.out.println("  - " + servicio.getNombre() + " - $" + servicio.getPrecio());
-            }
-        }
-        System.out.println("Costo servicios adicionales: $" + costoServiciosAdicionales);
-        System.out.println("Descuento aplicado: " + descuento + "%");
-        System.out.println("VALOR TOTAL: $" + valorTotal);
-
     }
 }

@@ -1,408 +1,579 @@
-package co.edu.uniquindio.parcial1;
 
-import co.edu.uniquindio.parcial1.model.Habitacion;
-import co.edu.uniquindio.parcial1.model.Hotel;
-import co.edu.uniquindio.parcial1.model.Huesped;
-import co.edu.uniquindio.parcial1.model.Reserva;
-import co.edu.uniquindio.parcial1.model.ServicioAdicional;
 
+import javax.swing.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Scanner;
+import java.time.ZoneId;
+import java.util.Date;
+
+import model.Habitacion;
+import model.Hotel;
+import model.Huesped;
+import model.Reserva;
+import model.ServicioAdicional;
 
 public class Main {
 
-    private static final Scanner sc = new Scanner(System.in);
-    private static Hotel hotel;
+    static Hotel hotel;
+
+    private static String pedirFecha(String mensaje) {
+        JSpinner spinnerFecha = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerFecha, "yyyy-MM-dd");
+        spinnerFecha.setEditor(editor);
+        spinnerFecha.setValue(new Date());
+
+        int opcion = JOptionPane.showConfirmDialog(null, spinnerFecha, mensaje,
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (opcion != JOptionPane.OK_OPTION) {
+            return null;
+        }
+
+        Date fechaSeleccionada = (Date) spinnerFecha.getValue();
+        LocalDate fechaLocal = fechaSeleccionada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return fechaLocal.toString();
+    }
 
     public static void main(String[] args) {
+        hotel = new Hotel("StayPlus", "900123456-7", "Armenia, Quindio", "6067441000", "www.stayplus.com");
 
-        //aqui se inicializan datos del hotel
-        hotel = new Hotel("StayPlus", "900123456-7", "Calle 10 # 5-20", "6067391234", "www.stayplus.com");
-
-        int opcion;
+        int opcion = 0;
         do {
-            mostrarMenu();
-            opcion = leerEntero("Seleccione una opcion: ");
+            opcion = Integer.parseInt(JOptionPane.showInputDialog("Sistema StayPlus:" +
+                    "\nSeleccione una opcion:" +
+                    "\n1. Huespedes" +
+                    "\n2. Habitaciones" +
+                    "\n3. Servicios adicionales" +
+                    "\n4. Reservas" +
+                    "\n5. Consultar numero perfecto por telefono de huesped" +
+                    "\n6. Consultar ingresos por fecha" +
+                    "\n0. Salir del sistema"));
 
             switch (opcion) {
-                case 1 -> registrarHuesped();
-                case 2 -> agregarHabitacion();
-                case 3 -> agregarServicioAdicional();
-                case 4 -> crearReserva();
-                case 5 -> agregarHabitacionAReserva();
-                case 6 -> agregarServicioAReserva();
-                case 7 -> confirmarReserva();
-                case 8 -> cambiarEstadoReserva();
-                case 9 -> buscarHuespedPorTelefono();
-                case 10 -> verificarNumeroPerfecto();
-                case 11 -> calcularIngresosPorFecha();
-                case 12 -> listarHabitacionesDisponibles();
-                case 13 -> imprimirDetalleReserva();
-                case 0 -> System.out.println("adios...");
-                default -> System.out.println("Opcion invalida intente de nuevo.");
+
+                case 1:
+                    menuHuespedes();
+                    break;
+
+                case 2:
+                    menuHabitaciones();
+                    break;
+
+                case 3:
+                    menuServicios();
+                    break;
+
+                case 4:
+                    menuReservas();
+                    break;
+
+                case 5:
+                    consultarNumeroPerfecto();
+                    break;
+
+                case 6:
+                    consultarIngresosPorFecha();
+                    break;
+
+                case 0:
+                    JOptionPane.showMessageDialog(null, "El programa finalizo");
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(null, "La opcion no es valida");
+                    break;
             }
-            System.out.println();
+
         } while (opcion != 0);
-
-        sc.close();
     }
 
+    private static void menuHuespedes() {
+        int opcion = 0;
+        do {
+            opcion = Integer.parseInt(JOptionPane.showInputDialog("Huespedes:" +
+                    "\n1. Registrar huesped" +
+                    "\n2. Mostrar huespedes" +
+                    "\n3. Actualizar huesped" +
+                    "\n4. Eliminar huesped" +
+                    "\n0. Volver"));
 
+            switch (opcion) {
 
-    private static void mostrarMenu() {
+                case 1:
+                    registrarHuesped();
+                    break;
 
-        System.out.println(" Hotel " + hotel.getNombreComercial());
+                case 2:
+                    mostrarHuespedes();
+                    break;
 
-        System.out.println("1.  Registrar huesped");
-        System.out.println("2.  Agregar habitacion");
-        System.out.println("3.  Agregar servicio adicional");
-        System.out.println("4.  Crear reserva");
-        System.out.println("5.  Agregar habitacion a una reserva");
-        System.out.println("6.  Agregar servicio adicional a una reserva");
-        System.out.println("7.  Confirmar reserva");
-        System.out.println("8.  Cambiar estado de una reserva");
-        System.out.println("9.  Buscar huesped por telefono");
-        System.out.println("10. Verificar si un telefono es numero perfecto");
-        System.out.println("11. Calcular ingresos por fecha");
-        System.out.println("12. Listar habitaciones disponibles");
-        System.out.println("13. Imprimir detalle de una reserva");
-        System.out.println("0.  Salir");
+                case 3:
+                    actualizarHuesped();
+                    break;
+
+                case 4:
+                    eliminarHuesped();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(null, "La opcion no es valida");
+                    break;
+            }
+
+        } while (opcion != 0);
     }
-
-
 
     private static void registrarHuesped() {
-        System.out.println("--- Registrar huesped ---");
-        String nombre = leerTexto("Nombre completo: ");
-        String documento = leerTexto("Documento de identidad: ");
-        String correo = leerTexto("Correo electronico: ");
-        int telefono = leerEntero("Telefono: ");
-        String pais = leerTexto("Pais de procedencia: ");
+        String documento = JOptionPane.showInputDialog("Ingrese el documento de identidad del huesped:");
+        String nombre = JOptionPane.showInputDialog("Ingrese el nombre completo:");
+        String telefono = JOptionPane.showInputDialog("Ingrese el telefono del huesped:");
+        String correo = JOptionPane.showInputDialog("Ingrese el correo electronico:");
+        String pais = JOptionPane.showInputDialog("Ingrese el pais de procedencia:");
 
-        Huesped huesped = new Huesped(nombre, documento, correo, telefono, pais);
-        hotel.registrarHuesped(huesped);
-        System.out.println("Huesped registrado con exito.");
+        Huesped nuevoHuesped = new Huesped(documento, nombre, telefono, correo, pais);
+
+        boolean resultado = hotel.registrarHuesped(nuevoHuesped);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Registro exitoso");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se hizo el registro");
+        }
     }
 
-    private static void agregarHabitacion() {
-        System.out.println("--- Agregar habitacion ---");
-        int numero = leerEntero("Numero de habitacion: ");
-        int piso = leerEntero("Piso: ");
-        String tipo = seleccionarTipoHabitacion();
-        int capacidad = leerEntero("Capacidad maxima: ");
-        double precio = leerDouble("Precio por noche: ");
-
-        Habitacion habitacion = new Habitacion(numero, piso, tipo, capacidad, precio);
-        hotel.agregarHabitacion(habitacion);
-        System.out.println("Habitacion agregada con exito.");
+    private static void mostrarHuespedes() {
+        JOptionPane.showMessageDialog(null, hotel.mostrarHuespedes());
     }
 
-    private static void agregarServicioAdicional() {
-        System.out.println(" Agregar servicio adicional ");
-        int codigo = leerEntero("Codigo del servicio: ");
-        String nombre = leerTexto("Nombre del servicio: ");
-        String descripcion = leerTexto("Descripcion: ");
-        double precio = leerDouble("Precio: ");
+    private static void actualizarHuesped() {
+        String documento = JOptionPane.showInputDialog("Ingrese el documento del huesped a actualizar:");
+        String nombre = JOptionPane.showInputDialog("Ingrese el nombre completo:");
+        String telefono = JOptionPane.showInputDialog("Ingrese el telefono del huesped:");
+        String correo = JOptionPane.showInputDialog("Ingrese el correo electronico:");
+        String pais = JOptionPane.showInputDialog("Ingrese el pais de procedencia:");
 
-        ServicioAdicional servicio = new ServicioAdicional(codigo, nombre, descripcion, precio);
-        hotel.agregarServicioAdicional(servicio);
-        System.out.println("Servicio adicional agregado con exito.");
+        boolean resultado = hotel.actualizarHuesped(documento, nombre, telefono, correo, pais);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se actualizo el huesped");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro el huesped");
+        }
     }
 
-    private static void crearReserva() {
-        System.out.println("Crear reserva ");
-        int telefono = leerEntero("Telefono del huesped que reserva: ");
-        Huesped huesped = hotel.buscarHuespedPorTelefono(telefono);
-        if (huesped == null) {
-            System.out.println("No existe un huesped registrado con ese telefono.");
+    private static void eliminarHuesped() {
+        String documento = JOptionPane.showInputDialog("Ingrese el documento del huesped a eliminar:");
+
+        boolean resultado = hotel.eliminarHuesped(documento);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se elimino el huesped");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro el huesped");
+        }
+    }
+
+    private static void menuHabitaciones() {
+        int opcion = 0;
+        do {
+            opcion = Integer.parseInt(JOptionPane.showInputDialog("Habitaciones:" +
+                    "\n1. Registrar habitacion" +
+                    "\n2. Mostrar habitaciones" +
+                    "\n3. Actualizar habitacion" +
+                    "\n4. Eliminar habitacion" +
+                    "\n0. Volver"));
+
+            switch (opcion) {
+
+                case 1:
+                    registrarHabitacion();
+                    break;
+
+                case 2:
+                    mostrarHabitaciones();
+                    break;
+
+                case 3:
+                    actualizarHabitacion();
+                    break;
+
+                case 4:
+                    eliminarHabitacion();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(null, "La opcion no es valida");
+                    break;
+            }
+
+        } while (opcion != 0);
+    }
+
+    private static void registrarHabitacion() {
+        String numero = JOptionPane.showInputDialog("Ingrese el numero de la habitacion:");
+        String piso = JOptionPane.showInputDialog("Ingrese el piso:");
+        String tipo = JOptionPane.showInputDialog("Ingrese el tipo (Individual, Doble, Suite):");
+        int capacidadMaxima = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la capacidad maxima:"));
+        double precioPorNoche = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el precio por noche:"));
+
+        Habitacion nuevaHabitacion = new Habitacion(numero, piso, tipo, capacidadMaxima, precioPorNoche);
+
+        boolean resultado = hotel.registrarHabitacion(nuevaHabitacion);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Registro exitoso");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se hizo el registro");
+        }
+    }
+
+    private static void mostrarHabitaciones() {
+        JOptionPane.showMessageDialog(null, hotel.mostrarHabitaciones());
+    }
+
+    private static void actualizarHabitacion() {
+        String numero = JOptionPane.showInputDialog("Ingrese el numero de la habitacion a actualizar:");
+        String piso = JOptionPane.showInputDialog("Ingrese el piso:");
+        String tipo = JOptionPane.showInputDialog("Ingrese el tipo (Individual, Doble, Suite):");
+        int capacidadMaxima = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la capacidad maxima:"));
+        double precioPorNoche = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el precio por noche:"));
+
+        boolean resultado = hotel.actualizarHabitacion(numero, piso, tipo, capacidadMaxima, precioPorNoche);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se actualizo la habitacion");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro la habitacion");
+        }
+    }
+
+    private static void eliminarHabitacion() {
+        String numero = JOptionPane.showInputDialog("Ingrese el numero de la habitacion a eliminar:");
+
+        boolean resultado = hotel.eliminarHabitacion(numero);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se elimino la habitacion");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro la habitacion");
+        }
+    }
+
+    private static void menuServicios() {
+        int opcion = 0;
+        do {
+            opcion = Integer.parseInt(JOptionPane.showInputDialog("Servicios adicionales:" +
+                    "\n1. Registrar servicio" +
+                    "\n2. Mostrar servicios" +
+                    "\n3. Actualizar servicio" +
+                    "\n4. Eliminar servicio" +
+                    "\n0. Volver"));
+
+            switch (opcion) {
+
+                case 1:
+                    registrarServicio();
+                    break;
+
+                case 2:
+                    mostrarServicios();
+                    break;
+
+                case 3:
+                    actualizarServicio();
+                    break;
+
+                case 4:
+                    eliminarServicio();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(null, "La opcion no es valida");
+                    break;
+            }
+
+        } while (opcion != 0);
+    }
+
+    private static void registrarServicio() {
+        String codigo = JOptionPane.showInputDialog("Ingrese el codigo del servicio:");
+        String nombre = JOptionPane.showInputDialog("Ingrese el nombre del servicio:");
+        String descripcion = JOptionPane.showInputDialog("Ingrese la descripcion del servicio:");
+        double precio = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el precio del servicio:"));
+        int opcionDisponible = Integer.parseInt(JOptionPane.showInputDialog("El servicio esta disponible:" +
+                "\n1. Si" +
+                "\n2. No"));
+        boolean disponible = opcionDisponible == 1;
+
+        ServicioAdicional nuevoServicio = new ServicioAdicional(codigo, nombre, descripcion, precio, disponible);
+
+        boolean resultado = hotel.registrarServicio(nuevoServicio);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Registro exitoso");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se hizo el registro");
+        }
+    }
+
+    private static void mostrarServicios() {
+        JOptionPane.showMessageDialog(null, hotel.mostrarServicios());
+    }
+
+    private static void actualizarServicio() {
+        String codigo = JOptionPane.showInputDialog("Ingrese el codigo del servicio a actualizar:");
+        String nombre = JOptionPane.showInputDialog("Ingrese el nombre del servicio:");
+        String descripcion = JOptionPane.showInputDialog("Ingrese la descripcion del servicio:");
+        double precio = Double.parseDouble(JOptionPane.showInputDialog("Ingrese el precio del servicio:"));
+        int opcionDisponible = Integer.parseInt(JOptionPane.showInputDialog("El servicio esta disponible:" +
+                "\n1. Si" +
+                "\n2. No"));
+        boolean disponible = opcionDisponible == 1;
+
+        boolean resultado = hotel.actualizarServicio(codigo, nombre, descripcion, precio, disponible);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se actualizo el servicio");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro el servicio");
+        }
+    }
+
+    private static void eliminarServicio() {
+        String codigo = JOptionPane.showInputDialog("Ingrese el codigo del servicio a eliminar:");
+
+        boolean resultado = hotel.eliminarServicio(codigo);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se elimino el servicio");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro el servicio");
+        }
+    }
+
+    private static void menuReservas() {
+        int opcion = 0;
+        do {
+            opcion = Integer.parseInt(JOptionPane.showInputDialog("Reservas:" +
+                    "\n1. Registrar reserva" +
+                    "\n2. Mostrar reservas" +
+                    "\n3. Agregar habitacion a reserva" +
+                    "\n4. Agregar servicio a reserva" +
+                    "\n5. Confirmar reserva" +
+                    "\n6. Cambiar estado de reserva" +
+                    "\n7. Eliminar reserva" +
+                    "\n0. Volver"));
+
+            switch (opcion) {
+
+                case 1:
+                    registrarReserva();
+                    break;
+
+                case 2:
+                    mostrarReservas();
+                    break;
+
+                case 3:
+                    agregarHabitacionAReserva();
+                    break;
+
+                case 4:
+                    agregarServicioAReserva();
+                    break;
+
+                case 5:
+                    confirmarReserva();
+                    break;
+
+                case 6:
+                    cambiarEstadoReserva();
+                    break;
+
+                case 7:
+                    eliminarReserva();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(null, "La opcion no es valida");
+                    break;
+            }
+
+        } while (opcion != 0);
+    }
+
+    private static void registrarReserva() {
+        String documentoHuesped = JOptionPane.showInputDialog("Ingrese el documento del huesped que hace la reserva:");
+        int posicionHuesped = hotel.buscarHuesped(documentoHuesped);
+
+        if (posicionHuesped == -1) {
+            JOptionPane.showMessageDialog(null, "El huesped no existe");
             return;
         }
 
-        String codigoReserva = leerTexto("Codigo de la reserva: ");
-        LocalDate fechaRealizacion = leerFecha("Fecha de realizacion (AAAA-MM-DD): ");
-        LocalDate fechaEntrada = leerFecha("Fecha de entrada (AAAA-MM-DD): ");
-        LocalDate fechaSalida = leerFecha("Fecha de salida (AAAA-MM-DD): ");
-        int cantidadNoches = leerEntero("Cantidad de noches: ");
-        String metodoPago = seleccionarMetodoPago();
+        Huesped huesped = hotel.getListaHuespedes().get(posicionHuesped);
 
-        Reserva reserva = new Reserva(codigoReserva, fechaRealizacion, fechaEntrada,
-                fechaSalida, metodoPago, cantidadNoches, huesped);
-
-        System.out.println("Reserva creada con exito en estado Pendiente.");
-
-        boolean agregarMas = true;
-        while (agregarMas) {
-            int numHabitacion = leerEntero("Numero de habitacion a incluir (0 para terminar): ");
-            if (numHabitacion == 0) {
-                agregarMas = false;
-                continue;
-            }
-            Habitacion habitacion = buscarHabitacionPorNumero(numHabitacion);
-            if (habitacion == null) {
-                System.out.println("No existe una habitacion con ese numero.");
-            } else if (!reserva.agregarHabitacion(habitacion)) {
-                System.out.println("La habitacion no esta disponible o ya fue agregada.");
-            } else {
-                System.out.println("Habitacion agregada a la reserva.");
-            }
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva:");
+        String fechaRealizacion = pedirFecha("Seleccione la fecha de realizacion:");
+        if (fechaRealizacion == null) {
+            JOptionPane.showMessageDialog(null, "Registro cancelado");
+            return;
         }
 
-        reserva.calcularValorTotal();
-        System.out.println("Valor total preliminar: $" + reserva.getValorTotal());
+        String fechaEntrada = pedirFecha("Seleccione la fecha de entrada:");
+        if (fechaEntrada == null) {
+            JOptionPane.showMessageDialog(null, "Registro cancelado");
+            return;
+        }
+
+        String fechaSalida = pedirFecha("Seleccione la fecha de salida:");
+        if (fechaSalida == null) {
+            JOptionPane.showMessageDialog(null, "Registro cancelado");
+            return;
+        }
+
+        String metodoPago = JOptionPane.showInputDialog("Ingrese el metodo de pago (Tarjeta de credito, Transferencia bancaria, Efectivo):");
+        int cantidadNoches = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la cantidad de noches:"));
+
+        Reserva nuevaReserva = new Reserva(codigoReserva, fechaRealizacion, fechaEntrada, fechaSalida,
+                metodoPago, cantidadNoches, huesped);
+
+        boolean resultado = hotel.registrarReserva(nuevaReserva);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Registro exitoso");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se hizo el registro");
+        }
+    }
+
+    private static void mostrarReservas() {
+        JOptionPane.showMessageDialog(null, hotel.mostrarReservas());
     }
 
     private static void agregarHabitacionAReserva() {
-        System.out.println(" Agregar habitacion a una reserva ");
-        String codigo = leerTexto("Codigo de la reserva: ");
-        Reserva reserva = buscarReservaPorCodigo(codigo);
-        if (reserva == null) {
-            System.out.println("No existe una reserva con ese codigo.");
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva:");
+        int posicionReserva = hotel.buscarReserva(codigoReserva);
+
+        String numeroHabitacion = JOptionPane.showInputDialog("Ingrese el numero de la habitacion:");
+        int posicionHabitacion = hotel.buscarHabitacion(numeroHabitacion);
+
+        if (posicionReserva == -1 || posicionHabitacion == -1) {
+            JOptionPane.showMessageDialog(null, "La reserva o la habitacion no existen");
             return;
         }
 
-        int numHabitacion = leerEntero("Numero de habitacion a incluir: ");
-        Habitacion habitacion = buscarHabitacionPorNumero(numHabitacion);
-        if (habitacion == null) {
-            System.out.println("No existe una habitacion con ese numero.");
-            return;
-        }
+        Reserva reserva = hotel.getListaReservas().get(posicionReserva);
+        Habitacion habitacion = hotel.getListaHabitaciones().get(posicionHabitacion);
 
-        if (reserva.agregarHabitacion(habitacion)) {
-            reserva.calcularValorTotal();
-            System.out.println("Habitacion agregada. Nuevo valor total: $" + reserva.getValorTotal());
+        boolean resultado = reserva.agregarHabitacion(habitacion);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Habitacion agregada a la reserva");
         } else {
-            System.out.println("La habitacion no esta disponible o ya fue agregada a esta reserva.");
+            JOptionPane.showMessageDialog(null, "No se pudo agregar la habitacion");
         }
     }
 
     private static void agregarServicioAReserva() {
-        System.out.println("Agregar servicio adicional a una reserva");
-        String codigoReserva = leerTexto("Codigo de la reserva: ");
-        Reserva reserva = buscarReservaPorCodigo(codigoReserva);
-        if (reserva == null) {
-            System.out.println("No existe una reserva con ese codigo.");
-            return;
-        }
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva:");
+        String codigoServicio = JOptionPane.showInputDialog("Ingrese el codigo del servicio:");
 
-        int codigoServicio = leerEntero("Codigo del servicio adicional: ");
-        ServicioAdicional servicio = buscarServicioPorCodigo(codigoServicio);
-        if (servicio == null) {
-            System.out.println("No existe un servicio con ese codigo.");
-            return;
-        }
+        boolean resultado = hotel.agregarServicioAReserva(codigoReserva, codigoServicio);
 
-        reserva.agregarServicioAdicional(servicio);
-        reserva.calcularValorTotal();
-        System.out.println("Servicio agregado Nuevo valor total: $" + reserva.getValorTotal());
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Servicio agregado a la reserva");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se pudo agregar el servicio");
+        }
     }
 
     private static void confirmarReserva() {
-        System.out.println(" Confirmar reserva ");
-        String codigo = leerTexto("Codigo de la reserva: ");
-        Reserva reserva = buscarReservaPorCodigo(codigo);
-        if (reserva == null) {
-            System.out.println("No existe una reserva con ese codigo.");
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva a confirmar:");
+        int posicion = hotel.buscarReserva(codigoReserva);
+
+        if (posicion == -1) {
+            JOptionPane.showMessageDialog(null, "La reserva no existe");
             return;
         }
 
-        if (reserva.confirmarReserva()) {
-            System.out.println("Reserva confirmada. Las habitaciones incluidas quedaron marcadas como Reservada.");
+        Reserva reserva = hotel.getListaReservas().get(posicion);
+        boolean resultado = reserva.confirmarReserva();
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Reserva confirmada. Valor total: " + reserva.getValorTotal());
         } else {
-            System.out.println("La reserva no se pudo confirmar (verifique que este en estado Pendiente).");
+            JOptionPane.showMessageDialog(null, "La reserva no se pudo confirmar");
         }
     }
 
     private static void cambiarEstadoReserva() {
-        System.out.println(" Cambiar estado de una reserva ");
-        String codigo = leerTexto("Codigo de la reserva: ");
-        Reserva reserva = buscarReservaPorCodigo(codigo);
-        if (reserva == null) {
-            System.out.println("No existe una reserva con ese codigo.");
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva:");
+        int posicion = hotel.buscarReserva(codigoReserva);
+
+        if (posicion == -1) {
+            JOptionPane.showMessageDialog(null, "La reserva no existe");
             return;
         }
 
-        String nuevoEstado = seleccionarEstadoReserva();
-        reserva.cambiarEstado(nuevoEstado);
-        System.out.println("Estado actualizado a: " + nuevoEstado);
+        String nuevoEstado = JOptionPane.showInputDialog("Ingrese el nuevo estado" +
+                "\n(Pendiente, Confirmada, En curso, Finalizada, Cancelada):");
+
+        hotel.getListaReservas().get(posicion).cambiarEstado(nuevoEstado);
+
+        JOptionPane.showMessageDialog(null, "Estado actualizado");
     }
 
-    private static void buscarHuespedPorTelefono() {
-        System.out.println(" Buscar huesped por telefono ");
-        int telefono = leerEntero("Telefono a buscar: ");
+    private static void eliminarReserva() {
+        String codigoReserva = JOptionPane.showInputDialog("Ingrese el codigo de la reserva a eliminar:");
+
+        boolean resultado = hotel.eliminarReserva(codigoReserva);
+
+        if (resultado) {
+            JOptionPane.showMessageDialog(null, "Se elimino la reserva");
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontro la reserva");
+        }
+    }
+
+    private static void consultarNumeroPerfecto() {
+        String telefono = JOptionPane.showInputDialog("Ingrese el telefono del huesped a consultar:");
+
         Huesped huesped = hotel.buscarHuespedPorTelefono(telefono);
+
         if (huesped == null) {
-            System.out.println("No se encontro ningun huesped con ese telefono.");
-        } else {
-            System.out.println("Huesped encontrado: " + huesped.getNombre()
-                    + " Documento: " + huesped.getID()
-                    + " Correo: " + huesped.getCorreo()
-                    + " Pais: " + huesped.getPaisPorcedencia());
-        }
-    }
-
-    private static void verificarNumeroPerfecto() {
-        System.out.println("Verificar num perfecto");
-        int telefono = leerEntero("Telefono a verificar: ");
-        if (hotel.telefonoHuespedEsPerfecto(telefono)) {
-            System.out.println("El telefono " + telefono + " es un numero perfecto.");
-        } else {
-            System.out.println("El telefono " + telefono + " NO es un numero perfecto (o el huesped no existe).");
-        }
-    }
-
-    private static void calcularIngresosPorFecha() {
-        System.out.println("ingredsos por fecha ");
-        LocalDate fecha = leerFecha("Fecha de realizacion a consultar (AAAA-MM-DD): ");
-        double ingresos = hotel.calcularIngresosPorFecha(fecha);
-        System.out.println("Ingresos totales el " + fecha + ": $" + ingresos);
-    }
-
-    private static void listarHabitacionesDisponibles() {
-        System.out.println("--- Habitaciones disponibles ---");
-        boolean hayDisponibles = false;
-        for (Habitacion habitacion : hotel.getListHotelHabitaciones()) {
-            if (habitacion.estaDisponible()) {
-                hayDisponibles = true;
-                System.out.println("Numero " + habitacion.getNumero() + " - Piso " + habitacion.getPiso()
-                        + " - " + habitacion.getTipo() + " - $" + habitacion.getPrecioPorNoche() + " por noche");
-            }
-        }
-        if (!hayDisponibles) {
-            System.out.println("No hay habitaciones disponibles en este momento.");
-        }
-    }
-
-    private static void imprimirDetalleReserva() {
-        System.out.println("Imprimir recibo de reserva ");
-        String codigo = leerTexto("Codigo de la reserva: ");
-        Reserva reserva = buscarReservaPorCodigo(codigo);
-        if (reserva == null) {
-            System.out.println("No existe una reserva con ese codigo.");
+            JOptionPane.showMessageDialog(null, "No se encontro un huesped con ese telefono");
             return;
         }
-        reserva.imprimirDetalleReserva();
+
+        boolean esPerfecto = hotel.esNumeroPerfecto(telefono);
+
+        String mensaje = "Huesped encontrado: " + huesped.getNombre() +
+                "\nEl telefono " + telefono + (esPerfecto ? " SI es un numero perfecto" : " NO es un numero perfecto");
+
+        JOptionPane.showMessageDialog(null, mensaje);
     }
 
-
-
-    private static String seleccionarTipoHabitacion() {
-        System.out.println("Tipo de habitacion:");
-        System.out.println("1. Individual");
-        System.out.println("2. Doble");
-        System.out.println("3. Suite");
-        int opcion = leerEntero("Seleccione una opcion: ");
-        return switch (opcion) {
-            case 1 -> "Individual";
-            case 2 -> "Doble";
-            case 3 -> "Suite";
-            default -> "Individual";
-        };
-    }
-
-    private static String seleccionarMetodoPago() {
-        System.out.println("Metodo de pago:");
-        System.out.println("1. Tarjeta de credito");
-        System.out.println("2. Transferencia bancaria");
-        System.out.println("3. Efectivo");
-        int opcion = leerEntero("Seleccione una opcion: ");
-        return switch (opcion) {
-            case 1 -> "Tarjeta de credito";
-            case 2 -> "Transferencia bancaria";
-            case 3 -> "Efectivo";
-            default -> "Efectivo";
-        };
-    }
-
-    private static String seleccionarEstadoReserva() {
-        System.out.println("Nuevo estado:");
-        System.out.println("1. Pendiente");
-        System.out.println("2. Confirmada");
-        System.out.println("3. En curso");
-        System.out.println("4. Finalizada");
-        System.out.println("5. Cancelada");
-        int opcion = leerEntero("Seleccione una opcion: ");
-        return switch (opcion) {
-            case 1 -> "Pendiente";
-            case 2 -> "Confirmada";
-            case 3 -> "En curso";
-            case 4 -> "Finalizada";
-            case 5 -> "Cancelada";
-            default -> "Pendiente";
-        };
-    }
-
-
-
-    private static Habitacion buscarHabitacionPorNumero(int numero) {
-        for (Habitacion h : hotel.getListHotelHabitaciones()) {
-            if (h.getNumero() == numero) {
-                return h;
-            }
+    private static void consultarIngresosPorFecha() {
+        String fecha = pedirFecha("Seleccione la fecha a consultar:");
+        if (fecha == null) {
+            JOptionPane.showMessageDialog(null, "Consulta cancelada");
+            return;
         }
-        return null;
-    }
 
-    private static ServicioAdicional buscarServicioPorCodigo(int codigo) {
-        for (ServicioAdicional s : hotel.getListHotelServiciosAdicionales()) {
-            if (s.getCodigo() == codigo) {
-                return s;
-            }
-        }
-        return null;
-    }
+        double ingresos = hotel.calcularIngresosPorFecha(fecha);
 
-    private static Reserva buscarReservaPorCodigo(String codigo) {
-        for (Huesped huesped : hotel.getListHotelHuespedes()) {
-            for (Reserva reserva : huesped.getListReservasHuesped()) {
-                if (reserva.getCodigoReserva().equals(codigo)) {
-                    return reserva;
-                }
-            }
-        }
-        return null;
-    }
-
-
-
-    private static String leerTexto(String mensaje) {
-        System.out.print(mensaje);
-        return sc.nextLine();
-    }
-
-    private static int leerEntero(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String entrada = sc.nextLine();
-            try {
-                return Integer.parseInt(entrada.trim());
-            } catch (NumberFormatException e) {
-                System.out.println("Por favor ingrese un numero valido.");
-            }
-        }
-    }
-
-    private static double leerDouble(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String entrada = sc.nextLine();
-            try {
-                return Double.parseDouble(entrada.trim());
-            } catch (NumberFormatException e) {
-                System.out.println("Por favor ingrese un numero valido.");
-            }
-        }
-    }
-
-    private static LocalDate leerFecha(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String entrada = sc.nextLine();
-            try {
-                return LocalDate.parse(entrada.trim());
-            } catch (DateTimeParseException e) {
-                System.out.println("Por favor ingrese una fecha valida en formato AAAA-MM-DD.");
-            }
-        }
+        JOptionPane.showMessageDialog(null, "Los ingresos por reservas realizadas en " + fecha + " son: " + ingresos);
     }
 }
